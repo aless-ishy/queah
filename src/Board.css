@@ -1,0 +1,23 @@
+.Board{
+    text-align: center;
+}
+.Board-header {
+    background-color: #61dafb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.Board-chess{
+    height: 900px;
+    width: 900px;
+
+}
+.Hat{
+    position: absolute;
+    height: 100px;
+    width: 100px;
+
+}

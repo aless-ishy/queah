@@ -1,0 +1,11 @@
+.Quad{
+}
+.GridBoard{
+    height: 450px;
+    width: 450px;
+}
+.InnerGridBoard{
+    height: 300px;
+    width: 300px;
+    position: absolute;
+}
