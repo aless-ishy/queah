@@ -23,7 +23,7 @@ class SideBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            jogador: {pontuação: 10},
+            jogador: {pontuação: 100},
             iA: {pontuação: 0},
             posição: {i: 0, j: 0, jogador: true},
             matrizExterna: this.matrizInicialExterna(),
