@@ -1,41 +1,136 @@
-import React from 'react';
-import board from './board.png';
-import './Board.css';
+class Board {
 
-class Board extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {x: 0, y: 0};
-        this.handleClick = this.handleClick.bind(this);
-    }
-
-    handleClick(e) {
-
-        this.setState(
-
-            this.posicionamento(e.screenX,e.screenY)
-        );
+    constructor(innerWidth, innerHeight) {
+        // Exemplo de item na Matriz
+        // {
+        //     player: 2,
+        //         posição: {
+        //     left: x_, top: y_, height: "100px",
+        //         width: "100px", position: "absolute"
+        // }
+        this.matrizExterna = this.matrizInicialExterna(innerWidth, innerHeight);
+        this.matrizInterna = this.matrizInicialInterna(innerWidth, innerHeight);
 
     }
-    posicionamento(x,y) {
-        x = Math.trunc((-window.innerWidth/2+x+450)/254);
-        y = Math.trunc((-window.innerHeight/2+y+450)/256);
-        return {x:x,y:y};
+
+    jogada(i, j, player, matrizExterna) {
+        if (matrizExterna)
+            this.matrizExterna[i][j] = {
+                player: player,
+                posição: this.matrizExterna[i][j].posição
+            };
+        else
+            this.matrizInterna[i][j] = {
+                player: player,
+                posição: this.matrizInterna[i][j].posição
+            };
     }
 
+    matrizInicialExterna(innerWidth, innerHeight) {
+        let resolução = innerHeight - 10;
+        let ppq = 254 * resolução / 1200;
+        let x = innerWidth * 0.5 - resolução / 2;
+        let y = innerHeight * 0.5 - resolução / 2;
+        let A = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null]
+        ];
+        for (let i = 0; i < 3; i++)
+            for (let j = 0; j < 3; j++) {
+                let x_ = x + 346 * resolução / 1200 - 50 + (j) * ppq;
+                let y_ = y + 346 * resolução / 1200 - 50 + (i) * ppq;
+                x_ = x_ + "px";
+                y_ = y_ + "px";
+                A[i][j] = {
+                    player: 0,
+                    posição: {
+                        left: x_, top: y_, height: "100px",
+                        width: "100px", position: "absolute"
+                    }
+                };
+            }
+        for (let i = 0; i < 2; i++) {
+            let j = 2;
+            let x_ = x + 346 * resolução / 1200 - 50 + (j) * ppq;
+            let y_ = y + 346 * resolução / 1200 - 50 + (i) * ppq;
+            x_ = x_ + "px";
+            y_ = y_ + "px";
+            A[i][j] = {
+                player: 1,
+                posição: {
+                    left: x_, top: y_, height: "100px",
+                    width: "100px", position: "absolute"
+                }
+            };
+        }
+        for (let i = 1; i < 3; i++) {
+            let j = 0;
+            let x_ = x + 346 * resolução / 1200 - 50 + (j) * ppq;
+            let y_ = y + 346 * resolução / 1200 - 50 + (i) * ppq;
+            x_ = x_ + "px";
+            y_ = y_ + "px";
+            A[i][j] = {
+                player: 2,
+                posição: {
+                    left: x_, top: y_, height: "100px",
+                    width: "100px", position: "absolute"
+                }
+            };
+        }
 
-    render() {
-        return (
-            <div className="Board">
-                <header className="Board-header">
-                    <img className="Board-chess" src={board} onClick={this.handleClick}/>
-                    <h1>X: {this.state.x}</h1>
-                    <h1>Y: {this.state.y}</h1>
-                </header>
-            </div>
-        );
+        return A;
+
     }
+
+    matrizInicialInterna(innerWidth, innerHeight) {
+        let resolução = innerHeight - 10;
+        let ppq = 254 * resolução / 1200;
+        let x = innerWidth * 0.5 - resolução / 2;
+        let y = innerHeight * 0.5 - resolução / 2;
+        let B = [
+            [null, null],
+            [null, null]
+
+        ];
+
+        for (let i = 0; i < 2; i++) {
+            let j = 1;
+            let x_ = x + 473 * resolução / 1200 - 50 + (j) * ppq;
+            let y_ = y + 473 * resolução / 1200 - 50 + (i) * ppq;
+            x_ = x_ + "px";
+            y_ = y_ + "px";
+            B[i][j] = {
+                player: 1,
+                posição: {
+                    left: x_, top: y_, height: "100px",
+                    width: "100px", position: "absolute"
+                }
+            };
+        }
+
+        for (let i = 0; i < 2; i++) {
+            let j = 0;
+            let x_ = x + 473 * resolução / 1200 - 50 + (j) * ppq;
+            let y_ = y + 473 * resolução / 1200 - 50 + (i) * ppq;
+            x_ = x_ + "px";
+            y_ = y_ + "px";
+            B[i][j] = {
+                player: 2,
+                posição: {
+                    left: x_, top: y_, height: "100px",
+                    width: "100px", position: "absolute"
+                }
+            };
+        }
+
+        return B;
+
+    }
+
+    copyMatrix() {
+
+    }
+
 
 }
-
-export default Board;
