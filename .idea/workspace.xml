@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c75419d-7641-4ed0-b876-012f0865a327" name="Default Changelist" comment="Parte2">
-      <change afterPath="$PROJECT_DIR$/src/Tree.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hatmov.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Board.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Board.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SideBar.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/SideBar.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -67,7 +64,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.Debug Application">
+  <component name="RunManager" selected="npm.npm start">
     <configuration name="Debug Application" type="JavascriptDebugType" uri="http://localhost:3000">
       <method v="2" />
     </configuration>
@@ -124,6 +121,8 @@
       <workItem from="1567244719068" duration="23116000" />
       <workItem from="1567345516655" duration="22801000" />
       <workItem from="1567411841809" duration="429000" />
+      <workItem from="1567424184837" duration="4672000" />
+      <workItem from="1567618046884" duration="587000" />
     </task>
     <task id="LOCAL-00001" summary="Parte1">
       <created>1566774275892</created>
@@ -171,6 +170,18 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/SideBar.js</url>
+          <line>314</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/SideBar.js</url>
+          <line>315</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="javascript-exception" />
       </default-breakpoints>

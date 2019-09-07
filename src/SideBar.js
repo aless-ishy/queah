@@ -36,7 +36,8 @@ class SideBar extends React.Component {
                 width: (window.innerHeight - 10) + "px",
                 position: "absolute"
             },
-            jogadas: []
+            jogadas: [],
+            ultimoClick: null
         };
 
         this.handleClick = this.handleClick.bind(this);
@@ -173,7 +174,6 @@ class SideBar extends React.Component {
         else
             player = B[i][j];
 
-        
 
         if (player != 0)
             for (let k = 0; k < 2; k++)
@@ -183,7 +183,12 @@ class SideBar extends React.Component {
                         if (this.validar(i - k, j - l, false)) {
                             switch (B[i - k][j - l]) {
                                 case 0:
-                                    a.push({i: i - k, j: j - l, player: (player == 2 ? 3 : player), matrizExterna: false});
+                                    a.push({
+                                        i: i - k,
+                                        j: j - l,
+                                        player: (player == 2 ? 3 : player),
+                                        matrizExterna: false
+                                    });
                                     break;
                                 case player:
                                     break;
@@ -192,16 +197,36 @@ class SideBar extends React.Component {
 
                                     if (i === auxi && j === auxj && this.validar(i + 1, j + 1, true)) {
                                         if (A[i + 1][j + 1] === 0)
-                                            a.push({i: i + 1, j: j + 1, player: (player == 2 ? 3 : player), matrizExterna: true});
+                                            a.push({
+                                                i: i + 1,
+                                                j: j + 1,
+                                                player: (player == 2 ? 3 : player),
+                                                matrizExterna: true
+                                            });
                                     } else if (i - 1 === auxi && j === auxj && this.validar(i - 1, j + 1, true)) {
                                         if (A[i - 1][j + 1] === 0)
-                                            a.push({i: i - 1, j: j + 1, player: (player == 2 ? 3 : player), matrizExterna: true});
+                                            a.push({
+                                                i: i - 1,
+                                                j: j + 1,
+                                                player: (player == 2 ? 3 : player),
+                                                matrizExterna: true
+                                            });
                                     } else if (i - 1 === auxi && j - 1 === auxj && this.validar(i - 1, j - 1, true)) {
                                         if (A[i - 1][j - 1] === 0)
-                                            a.push({i: i - 1, j: j - 1, player: (player == 2 ? 3 : player), matrizExterna: true});
+                                            a.push({
+                                                i: i - 1,
+                                                j: j - 1,
+                                                player: (player == 2 ? 3 : player),
+                                                matrizExterna: true
+                                            });
                                     } else if (i === auxi && j - 1 === auxj && this.validar(i + 1, j - 1, true)) {
                                         if (A[i + 1][j - 1] === 0)
-                                            a.push({i: i + 1, j: j - 1, player: (player == 2 ? 3 : player), matrizExterna: true});
+                                            a.push({
+                                                i: i + 1,
+                                                j: j - 1,
+                                                player: (player == 2 ? 3 : player),
+                                                matrizExterna: true
+                                            });
                                     }
                             }
                         }
@@ -217,16 +242,36 @@ class SideBar extends React.Component {
                                 let auxi = i + k, auxj = j + l;
                                 if (i + 1 === auxi && j + 1 === auxj && this.validar(i + 1, j + 1, false)) {
                                     if (B[i + 1][j + 1] === 0)
-                                        a.push({i: i + 1, j: j + 1, player: (player == 2 ? 3 : player), matrizExterna: false});
+                                        a.push({
+                                            i: i + 1,
+                                            j: j + 1,
+                                            player: (player == 2 ? 3 : player),
+                                            matrizExterna: false
+                                        });
                                 } else if (i === auxi && j + 1 === auxj && this.validar(i - 1, j + 1, false)) {
                                     if (B[i - 1][j + 1] === 0)
-                                        a.push({i: i - 1, j: j + 1, player: (player == 2 ? 3 : player), matrizExterna: false});
+                                        a.push({
+                                            i: i - 1,
+                                            j: j + 1,
+                                            player: (player == 2 ? 3 : player),
+                                            matrizExterna: false
+                                        });
                                 } else if (i === auxi && j === auxj && this.validar(i - 1, j - 1, false)) {
                                     if (B[i - 1][j - 1] === 0)
-                                        a.push({i: i - 1, j: j - 1, player: (player == 2 ? 3 : player), matrizExterna: false});
+                                        a.push({
+                                            i: i - 1,
+                                            j: j - 1,
+                                            player: (player == 2 ? 3 : player),
+                                            matrizExterna: false
+                                        });
                                 } else if (i + 1 === auxi && j === auxj && this.validar(i + 1, j - 1, false)) {
                                     if (A[i + 1][j - 1] === 0)
-                                        a.push({i: i + 1, j: j - 1, player: (player == 2 ? 3 : player), matrizExterna: false});
+                                        a.push({
+                                            i: i + 1,
+                                            j: j - 1,
+                                            player: (player == 2 ? 3 : player),
+                                            matrizExterna: false
+                                        });
                                 }
                         }
                 }
@@ -247,7 +292,14 @@ class SideBar extends React.Component {
 
     }
 
-    handleClick(e, a = this.state.matrizExterna, b = this.state.matrizInterna, jogadas = this.state.jogadas) {
+    isJogadaInVector(jogada, jogadas) {
+        for (let k = 0; k < jogadas.length; k++)
+            if (jogadas[k].i === jogada.i && jogadas[k].j === jogada.j && jogada.matrizExterna === jogadas[k].matrizExterna)
+                return jogadas[k];
+        return null;
+    }
+
+    handleClick(e, a = this.state.matrizExterna, b = this.state.matrizInterna, jogadas = this.state.jogadas, ultimo = this.state.ultimoClick) {
         // B[i][j] = {
         //     player: 2,
         //     posição: {
@@ -255,12 +307,31 @@ class SideBar extends React.Component {
         //         width: "100px", position: "absolute"
         //     }
         // };
-        if(jogadas.length > 0)
-            this.limparJogadas(jogadas);
 
         let position = this.posicionamento(e.clientX, e.clientY);
         let d = this.copiarMatiz(a);
         let c = this.copiarMatiz(b);
+
+        let mov = this.isJogadaInVector(position, jogadas);
+        if(mov != null){
+            mov = {i: mov.i, j: mov.j, matrizExterna: mov.matrizExterna, player: ultimo.player};
+            ultimo = {i: ultimo.i, j: ultimo.j, matrizExterna: ultimo.matrizExterna, player: 0};
+            jogadas.push(ultimo);
+        }
+
+        if (jogadas.length > 0)
+            this.limparJogadas(jogadas);
+
+        if(mov != null){
+            let novaMatriz = this.alterarMatriz([mov]);
+            this.setState({
+                matrizExterna: novaMatriz.matrizExterna,
+                matrizInterna: novaMatriz.matrizInterna,
+                ultimoClick: null
+            });
+            return;
+        }
+
         let movimentos = this.nextMoves(position.i, position.j, d, c, position.matrizExterna);
         let novaMatriz = this.alterarMatriz(movimentos, a, b);
         this.setState(
@@ -270,7 +341,12 @@ class SideBar extends React.Component {
                 posição: position,
                 matrizExterna: novaMatriz.matrizExterna,
                 matrizInterna: novaMatriz.matrizInterna,
-                jogadas: movimentos
+                jogadas: movimentos,
+                ultimoClick: {
+                    i: position.i,
+                    j: position.j,
+                    matrizExterna: position.matrizExterna,
+                    player: position.matrizExterna ? d[position.i][position.j] : c[position.i][position.j]}
             },
         );
 
@@ -321,8 +397,6 @@ class SideBar extends React.Component {
             }
         return {matrizExterna: A, matrizInterna: B};
     }
-
-
 
 
     render() {
