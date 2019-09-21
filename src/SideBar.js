@@ -12,22 +12,22 @@ import {withStyles} from "@material-ui/core/styles";
 
 const styles = {
     PieceButtonNP: {
-        background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+        background: 'linear-gradient(45deg, #FF8E53 30%, #2196F3 90%)',
         border: 0,
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
         color: 'white',
         height: 48,
-        padding: '0 30px',
+        padding: '0 30px'
     },
     PieceButtonP: {
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        background: 'linear-gradient(45deg, #2196F3 30%, #FF8E53 90%)',
         border: 0,
         borderRadius: 3,
         boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
         color: 'white',
         height: 48,
-        padding: '0 30px',
+        padding: '0 30px'
     },
     paper: {
         background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
@@ -105,6 +105,24 @@ class SideBar extends React.Component {
             }
         return spaces;
 
+    }
+
+    cancelAllMovements(A = this.state.externalMatrix, B = this.state.internalMatrix){
+        for(let i = 0; i < 3; i++)
+            for(let j = 0; j < 3; j++){
+                A[i][j].player = A[i][j].player === 3 ? 0 : A[i][j].player;
+
+                if(i < 2 && j < 2)
+                    B[i][j].player = B[i][j].player === 3 ? 0 : B[i][j].player;
+            }
+        return {externalMatrix: A, internalMatrix: B};
+    }
+
+    pieceOptions(){
+        this.updateMatrix(this.getAllEmptySpaces());
+    }
+    cancel(){
+        this.setState(this.cancelAllMovements());
     }
 
     cloneMatrix(A) {
@@ -322,6 +340,8 @@ class SideBar extends React.Component {
     }
 
     buttonClick() {
+        if(this.state.isPuttingPiece) this.cancel();
+        else this.pieceOptions();
         this.setState(state => ({isPuttingPiece: !state.isPuttingPiece}))
     }
 
