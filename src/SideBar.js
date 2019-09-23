@@ -9,6 +9,7 @@ import hatMov from "./images/hatmov.png";
 import empty from "./images/empty.png";
 import Button from '@material-ui/core/Button';
 import {withStyles} from "@material-ui/core/styles";
+import Tree from "./Tree";
 
 const styles = {
     PieceButtonNP: {
@@ -72,8 +73,8 @@ class SideBar extends React.Component {
         super(props);
 
         this.state = {
-            player: {score: 100},
-            iA: {score: 0},
+            player: {score: 0, remainingPieces: 10, externalPieces: 6},
+            iA: {score: 0, remainingPieces: 10, externalPieces: 6},
             position: {i: 0, j: 0, isExternalMatrix: true},
             externalMatrix: this.matrizInicialExterna(),
             internalMatrix: this.matrizInicialInterna(),
@@ -86,11 +87,17 @@ class SideBar extends React.Component {
             },
 
             movements: [],
+            removePieces: [],
             ultimoClick: null,
-            isPuttingPiece: false
+            isPuttingPiece: false,
+            lostPiece: 0,
+            turn: 1,
+
         };
         this.handleClick = this.handleClick.bind(this);
         this.buttonClick = this.buttonClick.bind(this);
+
+        let a = 1;
     }
 
     getAllEmptySpaces(A = this.state.externalMatrix, B = this.state.internalMatrix) {
@@ -98,30 +105,38 @@ class SideBar extends React.Component {
         for (let i = 0; i < 3; i++)
             for (let j = 0; j < 3; j++) {
                 if (A[i][j].player == 0)
-                    spaces.push({i: i, j: j, isExternalMatrix: true, player: 3});
+                    spaces.push({i: i, j: j, isExternalMatrix: true, player: 3, k: -1});
                 if (i < 2 && j < 2)
                     if (B[i][j].player == 0)
-                        spaces.push({i: i, j: j, isExternalMatrix: false, player: 3});
+                        spaces.push({i: i, j: j, isExternalMatrix: false, player: 3, k: -1});
             }
         return spaces;
 
     }
 
-    cancelAllMovements(A = this.state.externalMatrix, B = this.state.internalMatrix){
-        for(let i = 0; i < 3; i++)
-            for(let j = 0; j < 3; j++){
+    cancelAllMovements(A = this.state.externalMatrix, B = this.state.internalMatrix) {
+        for (let i = 0; i < 3; i++)
+            for (let j = 0; j < 3; j++) {
                 A[i][j].player = A[i][j].player === 3 ? 0 : A[i][j].player;
 
-                if(i < 2 && j < 2)
+                if (i < 2 && j < 2)
                     B[i][j].player = B[i][j].player === 3 ? 0 : B[i][j].player;
             }
         return {externalMatrix: A, internalMatrix: B};
     }
 
-    pieceOptions(){
-        this.updateMatrix(this.getAllEmptySpaces());
+    pieceOptions() {
+        let spaces = this.getAllEmptySpaces();
+        let matrix = this.updateMatrix(spaces);
+        this.setState({
+            externalMatrix: matrix.externalMatrix,
+            internalMatrix: matrix.internalMatrix,
+            movements: spaces,
+            removePieces: []
+        });
     }
-    cancel(){
+
+    cancel() {
         this.setState(this.cancelAllMovements());
     }
 
@@ -144,9 +159,11 @@ class SideBar extends React.Component {
 
     nextMoves(i, j, externalPlayerMatrix, internalPlayerMatrix, isExternalMatrix) {
         let a = [];
+        let b = [];
         let A = externalPlayerMatrix;
         let B = internalPlayerMatrix;
         let player;
+        let kindex = -1;
 
         if (isExternalMatrix)
             player = A[i][j];
@@ -161,12 +178,13 @@ class SideBar extends React.Component {
 
                         if (this.isPossible(i - k, j - l, false)) {
                             switch (B[i - k][j - l]) {
-                                case 0:
+                                case 0 :
                                     a.push({
                                         i: i - k,
                                         j: j - l,
                                         player: (player === 2 ? 3 : player),
-                                        isExternalMatrix: false
+                                        isExternalMatrix: false,
+                                        k: -1
                                     });
                                     break;
                                 case player:
@@ -174,38 +192,59 @@ class SideBar extends React.Component {
                                 default:
                                     let auxi = i - k, auxj = j - l;
 
+
                                     if (i === auxi && j === auxj && this.isPossible(i + 1, j + 1, true)) {
-                                        if (A[i + 1][j + 1] === 0)
+                                        if (A[i + 1][j + 1] === 0) {
+
+                                            kindex++;
                                             a.push({
                                                 i: i + 1,
                                                 j: j + 1,
                                                 player: (player === 2 ? 3 : player),
-                                                isExternalMatrix: true
+                                                isExternalMatrix: true,
+                                                k: kindex
                                             });
+                                            b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: false});
+                                        }
                                     } else if (i - 1 === auxi && j === auxj && this.isPossible(i - 1, j + 1, true)) {
-                                        if (A[i - 1][j + 1] === 0)
+                                        if (A[i - 1][j + 1] === 0) {
+
+                                            kindex++;
                                             a.push({
                                                 i: i - 1,
                                                 j: j + 1,
                                                 player: (player === 2 ? 3 : player),
-                                                isExternalMatrix: true
+                                                isExternalMatrix: true,
+                                                k: kindex
                                             });
+                                            b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: false});
+                                        }
                                     } else if (i - 1 === auxi && j - 1 === auxj && this.isPossible(i - 1, j - 1, true)) {
-                                        if (A[i - 1][j - 1] === 0)
+                                        if (A[i - 1][j - 1] === 0) {
+
+                                            kindex++;
                                             a.push({
                                                 i: i - 1,
                                                 j: j - 1,
                                                 player: (player === 2 ? 3 : player),
-                                                isExternalMatrix: true
+                                                isExternalMatrix: true,
+                                                k: kindex
                                             });
+                                            b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: false});
+                                        }
                                     } else if (i === auxi && j - 1 === auxj && this.isPossible(i + 1, j - 1, true)) {
-                                        if (A[i + 1][j - 1] === 0)
+                                        if (A[i + 1][j - 1] === 0) {
+
+                                            kindex++;
                                             a.push({
                                                 i: i + 1,
                                                 j: j - 1,
                                                 player: (player === 2 ? 3 : player),
-                                                isExternalMatrix: true
+                                                isExternalMatrix: true,
+                                                k: kindex
                                             });
+                                            b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: false});
+                                        }
                                     }
                             }
                         }
@@ -217,49 +256,67 @@ class SideBar extends React.Component {
                                     i: i + k,
                                     j: j + l,
                                     player: (player === 2 ? 3 : player),
-                                    isExternalMatrix: true
+                                    isExternalMatrix: true,
+                                    k: -1
                                 });
                                 break;
                             case player:
                                 break;
                             default:
                                 let auxi = i + k, auxj = j + l;
+
                                 if (i + 1 === auxi && j + 1 === auxj && this.isPossible(i + 1, j + 1, false)) {
-                                    if (B[i + 1][j + 1] === 0)
+                                    if (B[i + 1][j + 1] === 0) {
+                                        kindex++;
                                         a.push({
                                             i: i + 1,
                                             j: j + 1,
                                             player: (player === 2 ? 3 : player),
-                                            isExternalMatrix: false
+                                            isExternalMatrix: false,
+                                            k: kindex
                                         });
+                                        b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: true});
+                                    }
                                 } else if (i === auxi && j + 1 === auxj && this.isPossible(i - 1, j + 1, false)) {
-                                    if (B[i - 1][j + 1] === 0)
+                                    if (B[i - 1][j + 1] === 0) {
+                                        kindex++;
                                         a.push({
                                             i: i - 1,
                                             j: j + 1,
                                             player: (player === 2 ? 3 : player),
-                                            isExternalMatrix: false
+                                            isExternalMatrix: false,
+                                            k: kindex
                                         });
+                                        b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: true});
+                                    }
                                 } else if (i === auxi && j === auxj && this.isPossible(i - 1, j - 1, false)) {
-                                    if (B[i - 1][j - 1] === 0)
+                                    if (B[i - 1][j - 1] === 0) {
+                                        kindex++;
                                         a.push({
                                             i: i - 1,
                                             j: j - 1,
                                             player: (player === 2 ? 3 : player),
-                                            isExternalMatrix: false
+                                            isExternalMatrix: false,
+                                            k: kindex
                                         });
+                                        b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: true});
+                                    }
                                 } else if (i + 1 === auxi && j === auxj && this.isPossible(i + 1, j - 1, false)) {
-                                    if (A[i + 1][j - 1] === 0)
+                                    if (B[i + 1][j - 1] === 0) {
+                                        kindex++;
                                         a.push({
                                             i: i + 1,
                                             j: j - 1,
                                             player: (player === 2 ? 3 : player),
-                                            isExternalMatrix: false
+                                            isExternalMatrix: false,
+                                            k: kindex
                                         });
+                                        b.push({i: auxi, j: auxj, player: 0, isExternalMatrix: true});
+                                    }
                                 }
                         }
                 }
-        return a;
+        return {possibleMovements: a, removePieces: b};
     }
 
     cleanMoves(movements) {
@@ -270,7 +327,8 @@ class SideBar extends React.Component {
             {
                 externalMatrix: newMatrix.externalMatrix,
                 internalMatrix: newMatrix.internalMatrix,
-                movements: []
+                movements: [],
+                removePieces: []
             },
         );
 
@@ -279,11 +337,26 @@ class SideBar extends React.Component {
     isMoveInVector(movement, movements) {
         for (let k = 0; k < movements.length; k++)
             if (movements[k].i === movement.i && movements[k].j === movement.j && movement.isExternalMatrix === movements[k].isExternalMatrix)
-                return movements[k];
+                return k;
         return null;
     }
 
-    handleClick(e, a = this.state.externalMatrix, b = this.state.internalMatrix, movements = this.state.movements, ultimo = this.state.ultimoClick) {
+    searchMovement(a = this.cloneMatrix(this.state.externalMatrix), b = this.cloneMatrix(this.state.internalMatrix)){
+        let tree = new Tree(a, b, {
+            id: 1,
+            remainingPieces: 10,
+            externalPieces: 6
+        }, {
+            id: 2,
+            remainingPieces: 10,
+            externalPieces: 6
+        }, 0, false, 1);
+    }
+
+    handleClick(e, a = this.state.externalMatrix, b = this.state.internalMatrix, movements = this.state.movements, remove = this.state.removePieces,
+                ultimo = this.state.ultimoClick, lostPiece = this.state.lostPiece, turn = this.state.turn,
+                playerRemainingPieces = this.state.turn === 1 ? this.state.iA.externalPieces : this.state.player.externalPieces,
+                passivePlayerRemainingPieces = this.state.turn === 2 ? this.state.iA.externalPieces : this.state.player.externalPieces) {
         // B[i][j] = {
         //     player: 2,
         //     position: {
@@ -295,12 +368,29 @@ class SideBar extends React.Component {
         let position = this.posicionamento(e.clientX, e.clientY);
         let d = this.cloneMatrix(a);
         let c = this.cloneMatrix(b);
+        let k = this.isMoveInVector(position, movements);
+        let mov = k === null ? null : movements[k];
 
-        let mov = this.isMoveInVector(position, movements);
+
+        if (lostPiece !== 0 && !this.state.isPuttingPiece && playerRemainingPieces > 0) {
+            return;
+        }
+
+
         if (mov != null) {
-            mov = {i: mov.i, j: mov.j, isExternalMatrix: mov.isExternalMatrix, player: ultimo.player};
-            ultimo = {i: ultimo.i, j: ultimo.j, isExternalMatrix: ultimo.isExternalMatrix, player: 0};
-            movements.push(ultimo);
+            lostPiece = 0;
+            if (mov.k > -1) {
+                movements.push(remove[mov.k]);
+                lostPiece = ultimo.player === 1 ? 2 : 1;
+
+            }
+
+            mov = {i: mov.i, j: mov.j, isExternalMatrix: mov.isExternalMatrix, player: turn};
+
+            if (ultimo != null) {
+                ultimo = {i: ultimo.i, j: ultimo.j, isExternalMatrix: ultimo.isExternalMatrix, player: 0};
+                movements.push(ultimo);
+            }
         }
 
         if (movements.length > 0) {
@@ -311,15 +401,25 @@ class SideBar extends React.Component {
 
         if (mov != null) {
             let newMatrix = this.updateMatrix([mov]);
+            playerRemainingPieces = this.state.isPuttingPiece ? playerRemainingPieces - 1 : playerRemainingPieces;
             this.setState({
+                iA: {score: 0, externalPieces: turn === 1 ? playerRemainingPieces : passivePlayerRemainingPieces},
+                player: {score: 0, externalPieces: turn === 2 ? playerRemainingPieces : passivePlayerRemainingPieces},
                 externalMatrix: newMatrix.externalMatrix,
                 internalMatrix: newMatrix.internalMatrix,
-                ultimoClick: null
+                ultimoClick: null,
+                lostPiece: lostPiece,
+                turn: turn === 1 ? 2 : 1,
+                isPuttingPiece: false
             });
             return;
         }
+        if ((position.isExternalMatrix ? d[position.i][position.j] : c[position.i][position.j]) !== turn)
+            return;
 
         let nextMovements = this.nextMoves(position.i, position.j, d, c, position.isExternalMatrix);
+        let removePieces = nextMovements.removePieces;
+        nextMovements = nextMovements.possibleMovements;
         let newMatrix = this.updateMatrix(nextMovements, a, b);
 
         this.setState(
@@ -328,6 +428,7 @@ class SideBar extends React.Component {
                 externalMatrix: newMatrix.externalMatrix,
                 internalMatrix: newMatrix.internalMatrix,
                 movements: nextMovements,
+                removePieces: removePieces,
                 ultimoClick: {
                     i: position.i,
                     j: position.j,
@@ -339,8 +440,10 @@ class SideBar extends React.Component {
 
     }
 
-    buttonClick() {
-        if(this.state.isPuttingPiece) this.cancel();
+    buttonClick(e, remainingPieces = this.state.turn === 1 ? this.state.iA.remainingPieces : this.state.player.remainingPieces) {
+
+        if (remainingPieces < 1) return;
+        if (this.state.isPuttingPiece) this.cancel();
         else this.pieceOptions();
         this.setState(state => ({isPuttingPiece: !state.isPuttingPiece}))
     }
@@ -351,18 +454,15 @@ class SideBar extends React.Component {
         return (
             <div>
                 <Drawer anchor="left" variant="permanent" classes={{paper: classes.paper}}>
-                    <h2>Jogador</h2>
-                    <Divider/>
-                    <h3>Pontuação: {this.state.player.score} </h3>
-                    <Divider/>
                     <h2>IA</h2>
                     <Divider/>
-                    <h3>Pontuação: {this.state.iA.score} </h3>
+                    <h3>Peças Restantes: {this.state.iA.remainingPieces} </h3>
                     <Divider/>
-                    <h2>Posição</h2>
+                    <h2>Jogador</h2>
                     <Divider/>
-                    <h3>Matriz = ({this.state.position.i},{this.state.position.j})</h3>
-                    <h3>{this.state.position.isExternalMatrix ? "Externo" : "Interno"}</h3>
+                    <h3>Peças restantes: {this.state.player.remainingPieces} </h3>
+                    <Divider/>
+
 
                     {this.state.isPuttingPiece ?
                         (<Button className={classes.PieceButtonP} onClick={this.buttonClick}>Cancelar</Button>) :
