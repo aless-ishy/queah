@@ -132,6 +132,7 @@
       <workItem from="1567958456028" duration="22149000" />
       <workItem from="1568311063344" duration="1378000" />
       <workItem from="1569144883371" duration="27859000" />
+      <workItem from="1569241433306" duration="3070000" />
     </task>
     <task id="LOCAL-00001" summary="Parte1">
       <created>1566774275892</created>
@@ -185,6 +186,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Parte1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Parte1" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
 </project>

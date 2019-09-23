@@ -342,15 +342,14 @@ class SideBar extends React.Component {
     }
 
     searchMovement(a = this.cloneMatrix(this.state.externalMatrix), b = this.cloneMatrix(this.state.internalMatrix)){
-        let tree = new Tree(a, b, {
-            id: 1,
-            remainingPieces: 10,
-            externalPieces: 6
-        }, {
-            id: 2,
-            remainingPieces: 10,
-            externalPieces: 6
-        }, 0, false, 1);
+        let activePlayer = {id: 1, remainingPieces: this.state.iA.remainingPieces, externalPieces: this.state.iA.externalPieces};
+        let passivePlayer = {id: 2, remainingPieces: this.state.player.remainingPieces, externalPieces: this.state.player.externalPieces};
+        let tree = new Tree(a,b,activePlayer,passivePlayer,0,this.state.lostPiece,1);
+        return tree.getNextMove();
+    }
+
+    updateMatrixWithSearch(){
+        let node = this.searchMovement();
     }
 
     handleClick(e, a = this.state.externalMatrix, b = this.state.internalMatrix, movements = this.state.movements, remove = this.state.removePieces,

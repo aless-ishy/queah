@@ -8,10 +8,19 @@ export default class Tree {
         this.passivePlayer = passivePlayer;
         this.heuristic = heuristic;
         this.depth = depth;
-        if(depth > 0)
+        this.lostPiece = lostPiece;
+        if(depth > 0 && activePlayer.remainingPieces > 0)
             this.childrenMovement = lostPiece && activePlayer.externalPieces > 0 ? this.getPuttingPieceChildren() : this.getAllChildren();
         else
             this.childrenMovement = [];
+
+    }
+
+    getNextMove(){
+        Tree.alphaBeta(this,this.depth,-Infinity, Infinity, true);
+        for(let a in this.childrenMovement)
+            if(this.heuristic === this.heuristic)
+                return a;
 
     }
 
@@ -51,8 +60,6 @@ export default class Tree {
             }
         return children;
     }
-
-
     getAllEmptySpaces(player, A = this.externalPlayerMatrix, B = this.internalPlayerMatrix) {
         let spaces = [];
         for (let i = 0; i < 3; i++)
@@ -129,13 +136,13 @@ export default class Tree {
 
     }
 
-    static alphabeta(node, depth, alpha, beta, maximizingPlayer) {
+    static alphaBeta(node, depth, alpha, beta, maximizingPlayer) {
         if (depth === 0 || node.childrenMovement.length === 0)
             return node.heuristic;
         if (maximizingPlayer) {
             let value = -Infinity, aux;
             for (let child in node.childrenMovement) {
-                aux = this.alphabeta(child, depth - 1, alpha, beta, false);
+                aux = Tree.alphaBeta(child, depth - 1, alpha, beta, false);
                 value = value > aux ? value : aux;
                 alpha = alpha > value ? alpha : value;
                 if (alpha >= beta)
@@ -146,7 +153,7 @@ export default class Tree {
         } else {
             let value = Infinity, aux;
             for (let child in node.childrenMovement) {
-                aux = this.alphabeta(child, depth - 1, alpha, beta, true);
+                aux = Tree.alphaBeta(child, depth - 1, alpha, beta, true);
                 value = value < aux ? value : aux;
                 beta = beta < value ? alpha : value;
                 if (alpha >= beta)
