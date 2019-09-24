@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Drawer from "@material-ui/core/Drawer";
 import Divider from "@material-ui/core/Divider";
-import board from "./images/board.png";
+import board from "./images/Board1.png";
 import hat from "./images/hat_12-512.png";
 import hatIa from "./images/hatIa.png";
 import hatMov from "./images/hatmov.png";
@@ -10,6 +10,7 @@ import empty from "./images/empty.png";
 import Button from '@material-ui/core/Button';
 import {withStyles} from "@material-ui/core/styles";
 import Tree from "./Tree";
+import Grid from "@material-ui/core/Grid";
 
 const styles = {
     PieceButtonNP: {
@@ -73,8 +74,8 @@ class SideBar extends React.Component {
         super(props);
 
         this.state = {
-            player: {score: 0, remainingPieces: 10, externalPieces: 6},
-            iA: {score: 0, remainingPieces: 10, externalPieces: 6},
+            player: {remainingPieces: 10, externalPieces: 6},
+            iA: {remainingPieces: 10, externalPieces: 6},
             position: {i: 0, j: 0, isExternalMatrix: true},
             externalMatrix: this.matrizInicialExterna(),
             internalMatrix: this.matrizInicialInterna(),
@@ -128,12 +129,10 @@ class SideBar extends React.Component {
     pieceOptions() {
         let spaces = this.getAllEmptySpaces();
         let matrix = this.updateMatrix(spaces);
-        this.setState({
-            externalMatrix: matrix.externalMatrix,
-            internalMatrix: matrix.internalMatrix,
-            movements: spaces,
-            removePieces: []
-        });
+        this.state.externalMatrix = matrix.externalMatrix;
+        this.state.internalMatrix = matrix.internalMatrix;
+        this.state.movements = spaces;
+        this.state.removePieces = [];
     }
 
     cancel() {
@@ -341,21 +340,45 @@ class SideBar extends React.Component {
         return null;
     }
 
-    searchMovement(a = this.cloneMatrix(this.state.externalMatrix), b = this.cloneMatrix(this.state.internalMatrix)){
-        let activePlayer = {id: 1, remainingPieces: this.state.iA.remainingPieces, externalPieces: this.state.iA.externalPieces};
-        let passivePlayer = {id: 2, remainingPieces: this.state.player.remainingPieces, externalPieces: this.state.player.externalPieces};
-        let tree = new Tree(a,b,activePlayer,passivePlayer,0,this.state.lostPiece,1);
+    searchMovement(a = this.cloneMatrix(this.state.externalMatrix), b = this.cloneMatrix(this.state.internalMatrix), lostPiece = this.state.lostPiece) {
+        let activePlayer = {
+            id: 1,
+            remainingPieces: this.state.iA.remainingPieces,
+            externalPieces: this.state.iA.externalPieces
+        };
+        let passivePlayer = {
+            id: 2,
+            remainingPieces: this.state.player.remainingPieces,
+            externalPieces: this.state.player.externalPieces
+        };
+        let tree = new Tree(a, b, activePlayer, passivePlayer, 0, lostPiece > 0, 6);
         return tree.getNextMove();
     }
 
-    updateMatrixWithSearch(){
+    updateStateWithSearch(A = this.state.externalMatrix, B = this.state.internalMatrix) {
         let node = this.searchMovement();
+        this.updateMatrixWithMatrix(node.externalPlayerMatrix, node.internalPlayerMatrix, A, B);
+        this.setState({
+            player: node.activePlayer,
+            iA: node.passivePlayer,
+            externalMatrix: A,
+            internalMatrix: B,
+            movements: [],
+            removePieces: [],
+            ultimoClick: null,
+            isPuttingPiece: false,
+            lostPiece: node.lostPiece ? 2 : 0,
+            turn: 2
+        });
+
     }
 
-    handleClick(e, a = this.state.externalMatrix, b = this.state.internalMatrix, movements = this.state.movements, remove = this.state.removePieces,
-                ultimo = this.state.ultimoClick, lostPiece = this.state.lostPiece, turn = this.state.turn,
-                playerRemainingPieces = this.state.turn === 1 ? this.state.iA.externalPieces : this.state.player.externalPieces,
-                passivePlayerRemainingPieces = this.state.turn === 2 ? this.state.iA.externalPieces : this.state.player.externalPieces) {
+    componentDidMount(){
+        if(this.state.turn === 1)
+            this.updateStateWithSearch();
+    }
+
+    handleClick(e) {
         // B[i][j] = {
         //     player: 2,
         //     position: {
@@ -363,7 +386,17 @@ class SideBar extends React.Component {
         //         width: "100px", position: "absolute"
         //     }
         // };
-
+        let a = this.state.externalMatrix;
+        let b = this.state.internalMatrix;
+        let movements = this.state.movements;
+        let remove = this.state.removePieces;
+        let ultimo = this.state.ultimoClick;
+        let lostPiece = this.state.lostPiece;
+        let turn = this.state.turn;
+        let playerExternalPieces = this.state.turn === 1 ? this.state.iA.externalPieces : this.state.player.externalPieces;
+        let passivePlayerExternalPieces = this.state.turn === 2 ? this.state.iA.externalPieces : this.state.player.externalPieces;
+        let playerRemainingPieces = turn === 2 ? this.state.player.remainingPieces : this.state.iA.remainingPieces;
+        let passivePlayerRemainingPieces = turn === 1 ? this.state.player.remainingPieces : this.state.iA.remainingPieces;
         let position = this.posicionamento(e.clientX, e.clientY);
         let d = this.cloneMatrix(a);
         let c = this.cloneMatrix(b);
@@ -371,7 +404,9 @@ class SideBar extends React.Component {
         let mov = k === null ? null : movements[k];
 
 
-        if (lostPiece !== 0 && !this.state.isPuttingPiece && playerRemainingPieces > 0) {
+
+
+        if (lostPiece !== 0 && !this.state.isPuttingPiece && playerExternalPieces > 0) {
             return;
         }
 
@@ -381,6 +416,7 @@ class SideBar extends React.Component {
             if (mov.k > -1) {
                 movements.push(remove[mov.k]);
                 lostPiece = ultimo.player === 1 ? 2 : 1;
+                passivePlayerRemainingPieces--;
 
             }
 
@@ -400,17 +436,19 @@ class SideBar extends React.Component {
 
         if (mov != null) {
             let newMatrix = this.updateMatrix([mov]);
-            playerRemainingPieces = this.state.isPuttingPiece ? playerRemainingPieces - 1 : playerRemainingPieces;
-            this.setState({
-                iA: {score: 0, externalPieces: turn === 1 ? playerRemainingPieces : passivePlayerRemainingPieces},
-                player: {score: 0, externalPieces: turn === 2 ? playerRemainingPieces : passivePlayerRemainingPieces},
-                externalMatrix: newMatrix.externalMatrix,
-                internalMatrix: newMatrix.internalMatrix,
-                ultimoClick: null,
-                lostPiece: lostPiece,
-                turn: turn === 1 ? 2 : 1,
-                isPuttingPiece: false
-            });
+            playerExternalPieces = this.state.isPuttingPiece ? playerExternalPieces - 1 : playerExternalPieces;
+
+
+            this.state.iA = {remainingPieces: turn === 1 ? playerRemainingPieces : passivePlayerRemainingPieces, externalPieces: turn === 1 ? playerExternalPieces : passivePlayerExternalPieces};
+            this.state.player = {remainingPieces: turn === 2 ? playerRemainingPieces : passivePlayerRemainingPieces, externalPieces: turn === 2 ? playerExternalPieces : passivePlayerExternalPieces};
+            this.state.externalMatrix = newMatrix.externalMatrix;
+            this.state.internalMatrix = newMatrix.internalMatrix;
+            this.state.ultimoClick = null;
+            this.state.lostPiece = lostPiece;
+            this.state.turn = turn === 1 ? 2 : 1;
+            this.state.isPuttingPiece = false;
+            if(passivePlayerRemainingPieces > 0)
+                this.updateStateWithSearch();
             return;
         }
         if ((position.isExternalMatrix ? d[position.i][position.j] : c[position.i][position.j]) !== turn)
@@ -439,9 +477,9 @@ class SideBar extends React.Component {
 
     }
 
-    buttonClick(e, remainingPieces = this.state.turn === 1 ? this.state.iA.remainingPieces : this.state.player.remainingPieces) {
+    buttonClick(e, externalPieces = this.state.turn === 1 ? this.state.iA.externalPieces : this.state.player.externalPieces) {
 
-        if (remainingPieces < 1) return;
+        if (externalPieces < 1 || this.state.lostPiece === 0) return;
         if (this.state.isPuttingPiece) this.cancel();
         else this.pieceOptions();
         this.setState(state => ({isPuttingPiece: !state.isPuttingPiece}))
@@ -453,13 +491,21 @@ class SideBar extends React.Component {
         return (
             <div>
                 <Drawer anchor="left" variant="permanent" classes={{paper: classes.paper}}>
-                    <h2>IA</h2>
+                    <Grid container direction={"row"} justify={"left"}>
+                        <img src={hatIa} style={{height: "60px", width: "60px"}} alt={"hat"} />
+                        <h2>IA</h2>
+                    </Grid>
                     <Divider/>
-                    <h3>Peças Restantes: {this.state.iA.remainingPieces} </h3>
+                    <h3>Peças Externas: {this.state.iA.externalPieces} </h3>
+                    <h3>Peças Restantes: {this.state.iA.remainingPieces}</h3>
                     <Divider/>
-                    <h2>Jogador</h2>
+                    <Grid container direction={"row"} justify={"left"}>
+                        <img src={hat} style={{height: "60px", width: "60px"}} alt={"hat"} />
+                        <h2>Jogador</h2>
+                    </Grid>
                     <Divider/>
-                    <h3>Peças restantes: {this.state.player.remainingPieces} </h3>
+                    <h3>Peças Externas: {this.state.player.externalPieces} </h3>
+                    <h3>Peças Restantes: {this.state.player.remainingPieces}</h3>
                     <Divider/>
 
 
@@ -679,6 +725,15 @@ class SideBar extends React.Component {
                 };
             }
         return {externalMatrix: A, internalMatrix: B};
+    }
+
+    updateMatrixWithMatrix(a, b, A = this.state.externalMatrix, B = this.state.internalMatrix) {
+        for (let i = 0; i < 3; i++)
+            for (let j = 0; j < 3; j++) {
+                if (i < 2 && j < 2)
+                    B[i][j].player = b[i][j];
+                A[i][j].player = a[i][j];
+            }
     }
 
 }

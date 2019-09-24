@@ -9,6 +9,7 @@ export default class Tree {
         this.heuristic = heuristic;
         this.depth = depth;
         this.lostPiece = lostPiece;
+
         if(depth > 0 && activePlayer.remainingPieces > 0)
             this.childrenMovement = lostPiece && activePlayer.externalPieces > 0 ? this.getPuttingPieceChildren() : this.getAllChildren();
         else
@@ -18,9 +19,9 @@ export default class Tree {
 
     getNextMove(){
         Tree.alphaBeta(this,this.depth,-Infinity, Infinity, true);
-        for(let a in this.childrenMovement)
-            if(this.heuristic === this.heuristic)
-                return a;
+        for(let i = 0; i < this.childrenMovement.length; i++)
+            if(this.heuristic === this.childrenMovement[i].heuristic)
+                return this.childrenMovement[i];
 
     }
 
@@ -42,7 +43,7 @@ export default class Tree {
         return children;
     }
     getAllChildren(activePlayer = this.activePlayer.id, A = this.externalPlayerMatrix, B = this.internalPlayerMatrix) {
-        let children = this.getPuttingPieceChildren();
+        let children = [];
         for (let i = 0; i < 3; i++)
             for (let j = 0; j < 3; j++) {
 
@@ -94,10 +95,14 @@ export default class Tree {
             };
             let heuristic = this.heuristic + (passivePlayer.id === 1 ? 1 : -1) * (k > -1 ? 1 : 0);
 
+
             updates.push(movements.possibleMovements[m], {i: i, j: j, isExternalMatrix: isExternalMatrix, player: 0});
             if (k > -1) {
                 updates.push(movements.removePieces[k]);
-                this.passivePlayer.remainingPieces--;
+                activePlayer.remainingPieces =  activePlayer.remainingPieces - 1;
+                if(activePlayer.remainingPieces === 0)
+                    heuristic = (passivePlayer.id === 1 ? 1 : -1)*100*depth;
+
             }
 
             Tree.updateMatrix(updates, a, b);
@@ -118,12 +123,12 @@ export default class Tree {
             let passivePlayer = {
                 id: this.activePlayer.id,
                 remainingPieces: this.activePlayer.remainingPieces,
-                externalPieces: this.activePlayer.externalPieces
+                externalPieces: this.activePlayer.externalPieces -1
             };
             let activePlayer = {
                 id: this.passivePlayer.id,
                 remainingPieces: this.passivePlayer.remainingPieces,
-                externalPieces: this.passivePlayer.externalPieces - 1
+                externalPieces: this.passivePlayer.externalPieces
             };
 
 
@@ -141,8 +146,8 @@ export default class Tree {
             return node.heuristic;
         if (maximizingPlayer) {
             let value = -Infinity, aux;
-            for (let child in node.childrenMovement) {
-                aux = Tree.alphaBeta(child, depth - 1, alpha, beta, false);
+            for (let i = 0; i < node.childrenMovement.length; i ++) {
+                aux = Tree.alphaBeta(node.childrenMovement[i], depth - 1, alpha, beta, false);
                 value = value > aux ? value : aux;
                 alpha = alpha > value ? alpha : value;
                 if (alpha >= beta)
@@ -152,8 +157,8 @@ export default class Tree {
             return value;
         } else {
             let value = Infinity, aux;
-            for (let child in node.childrenMovement) {
-                aux = Tree.alphaBeta(child, depth - 1, alpha, beta, true);
+            for (let i = 0; i < node.childrenMovement.length; i ++) {
+                aux = Tree.alphaBeta(node.childrenMovement[i], depth - 1, alpha, beta, true);
                 value = value < aux ? value : aux;
                 beta = beta < value ? alpha : value;
                 if (alpha >= beta)
