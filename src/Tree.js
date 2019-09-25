@@ -101,7 +101,7 @@ export default class Tree {
                 updates.push(movements.removePieces[k]);
                 activePlayer.remainingPieces =  activePlayer.remainingPieces - 1;
                 if(activePlayer.remainingPieces === 0)
-                    heuristic = (passivePlayer.id === 1 ? 1 : -1)*100*depth;
+                    heuristic = heuristic + (passivePlayer.id === 1 ? 1 : -1)*100*depth;
 
             }
 
